@@ -1,13 +1,13 @@
 // driver-defender.cpp
-// Windows Admin Defender user-mode administration utility.
+// Windows Admin Defender administrator utility.
 //
-// This program intentionally keeps package installation/removal in the standard
-// Windows Driver Store / Service Control mechanisms. It does not bypass
-// Secure Boot, code-signing, Defender, Device Guard, or UAC.
+// The kernel component uses a Windows file-system minifilter to deny handles
+// opened directly on protected directories. Normal file opens and reads remain
+// available, while directory-handle based enumeration, copying, deletion, and
+// rename operations are denied.
 
 #include <windows.h>
 
-#include <cstdlib>
 #include <filesystem>
 #include <iostream>
 #include <string>
@@ -17,6 +17,9 @@ namespace {
 
 constexpr wchar_t kCommandName[] = L"driver-defender";
 constexpr wchar_t kProgramDirectory[] = L"WindowsAdminDefender";
+constexpr wchar_t kServiceName[] = L"WindowsAdminDefender";
+constexpr wchar_t kDriverPath[] =
+    L"C:\\Windows\\System32\\drivers\\WindowsAdminDefender.sys";
 
 void PrintUsage()
 {
@@ -33,15 +36,16 @@ void PrintUsage()
         << L"  uninstall  Alias for remove\n"
         << L"  status     Query the driver service\n"
         << L"  support    Show administrator support information\n"
-        << L"  module     Show the support-module location\n"
-        << L"  path       Show the installed command path\n";
+        << L"  module     Show the driver module location\n"
+        << L"  path       Show the installed support directory\n"
+        << L"  policy     Show the directory-lock policy\n";
 }
 
 int RunProcess(const std::wstring& executable,
                const std::wstring& arguments,
                bool waitForCompletion = true)
 {
-    std::wstring commandLine = L"\\\"" + executable + L"\\\"";
+    std::wstring commandLine = L"\"" + executable + L"\"";
     if (!arguments.empty()) {
         commandLine += L" " + arguments;
     }
@@ -63,9 +67,10 @@ int RunProcess(const std::wstring& executable,
                         nullptr,
                         &startupInfo,
                         &processInfo)) {
+        DWORD error = GetLastError();
         std::wcerr << kCommandName << L": CreateProcess failed: "
-                   << GetLastError() << L"\n";
-        return static_cast<int>(GetLastError());
+                   << error << L"\n";
+        return static_cast<int>(error);
     }
 
     if (!waitForCompletion) {
@@ -93,19 +98,10 @@ std::wstring ProgramDataDirectory()
     return std::wstring(buffer) + L"\\" + kProgramDirectory;
 }
 
-bool AddCommandDirectoryToMachinePath()
-{
-    // PATH modification is an installation-time administrator action. The
-    // utility only adds its own ProgramData support directory if requested by
-    // the installer; normal command execution does not mutate PATH.
-    std::wcout << L"PATH installation directory: " << ProgramDataDirectory() << L"\n";
-    return true;
-}
-
 int RunServiceCommand(const wchar_t* verb)
 {
     return RunProcess(L"C:\\Windows\\System32\\sc.exe",
-                      std::wstring(L" ") + verb + L" WindowsAdminDefender");
+                      std::wstring(verb) + L" " + kServiceName);
 }
 
 int RunPnPUtilAdd()
@@ -138,9 +134,16 @@ int RunPnPUtilRemove()
                       L"/delete-driver \"" + publishedInf + L"\" /uninstall");
 }
 
-int RunStatus()
+void PrintPolicy()
 {
-    return RunServiceCommand(L"query");
+    std::wcout
+        << L"Directory-lock policy:\n"
+        << L"  Protected roots: Windows system/application data directories\n"
+        << L"  Directory handles: denied\n"
+        << L"  Normal file opens/reads: permitted\n"
+        << L"  Directory enumeration/copy/delete/rename: denied\n"
+        << L"  Enforcement: Windows file-system minifilter\n"
+        << L"  Administrative installation: Driver Store / PnPUtil\n";
 }
 
 } // namespace
@@ -167,21 +170,28 @@ int wmain(int argc, wchar_t* argv[])
         return RunPnPUtilRemove();
     }
     if (command == L"status") {
-        return RunStatus();
+        return RunServiceCommand(L"query");
+    }
+    if (command == L"policy") {
+        PrintPolicy();
+        return 0;
     }
     if (command == L"support") {
-        std::wcout << L"Windows Admin Defender administrator support\n"
-                   << L"Driver service: WindowsAdminDefender\n"
-                   << L"Support directory: " << ProgramDataDirectory() << L"\n"
-                   << L"Installation/removal: PnPUtil / Driver Store\n";
+        std::wcout
+            << L"Windows Admin Defender administrator support\n"
+            << L"Driver service: " << kServiceName << L"\n"
+            << L"Driver module: " << kDriverPath << L"\n"
+            << L"Support directory: " << ProgramDataDirectory() << L"\n"
+            << L"Enforcement: directory-handle denial with normal file reads preserved\n";
         return 0;
     }
     if (command == L"module") {
-        std::wcout << ProgramDataDirectory() << L"\n";
+        std::wcout << kDriverPath << L"\n";
         return 0;
     }
     if (command == L"path") {
-        return AddCommandDirectoryToMachinePath() ? 0 : ERROR_INSTALL_FAILURE;
+        std::wcout << ProgramDataDirectory() << L"\n";
+        return 0;
     }
 
     PrintUsage();
