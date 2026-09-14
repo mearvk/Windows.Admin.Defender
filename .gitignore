@@ -21,3 +21,22 @@ rad.json
 *.flf
 #Test results file
 TestResults.xml
+
+
+### Windows Admin Defender build ###
+# Restored NuGet packages (WDK/SDK) — never committed, restored in CI/local build.
+source/packages/
+packages/
+# MSBuild / WDK build outputs.
+build/out/
+*.obj
+*.sys
+*.pdb
+*.cat
+*.exe
+*.lib
+*.iobj
+*.ipdb
+# Visual Studio local state.
+.vs/
+*.user

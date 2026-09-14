@@ -34,16 +34,21 @@ jobs:
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v2
 
+      - name: Add NuGet to PATH
+        uses: nuget/setup-nuget@v2
+
       # The user-mode utility only needs the standard Windows SDK (present on
-      # the runner). The kernel driver additionally needs the WDK.
-      - name: Install Windows Driver Kit (WDK)
+      # the runner). The kernel driver additionally needs the WDK, which we
+      # acquire via the official WDK/SDK NuGet packages rather than a
+      # machine-wide Visual Studio extension. This is Microsoft's supported
+      # CI/CD path (see install-the-wdk-using-nuget).
+      - name: Restore WDK/SDK NuGet packages
         shell: pwsh
         run: |
-          Write-Host "Installing WDK via Chocolatey..."
-          choco install windowsdriverkit11 -y --no-progress
-          if ($LASTEXITCODE -ne 0) {
-            Write-Warning "windowsdriverkit11 install returned $LASTEXITCODE; the driver build step may be skipped."
-          }
+          nuget restore source/packages.config -PackagesDirectory source/packages
+          if ($LASTEXITCODE -ne 0) { throw "NuGet restore failed ($LASTEXITCODE)." }
+          Write-Host "Restored packages:"
+          Get-ChildItem source/packages -Directory | Select-Object Name | Format-Table -AutoSize
 
       - name: Run verification gate
         shell: pwsh

@@ -56,6 +56,21 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.WindowsKernelModeDriver.10.0.props" Condition="Exists('$(VCTargetsPath)\Microsoft.Cpp.WindowsKernelModeDriver.10.0.props')" />
 
+  <!--
+    WDK / SDK NuGet package props (restored from source/packages.config).
+    These supply the kernel headers (ntddk.h, fltKernel.h) and libraries when
+    the WDK is not installed as a machine-wide Visual Studio extension, e.g. on
+    hosted CI runners. Paths follow the standard NuGet packages\ layout.
+  -->
+  <PropertyGroup Label="WdkNuGet">
+    <WadPackagesDir>$(MSBuildThisFileDirectory)..\packages\</WadPackagesDir>
+    <WadWdkVersion>10.0.26100.4654</WadWdkVersion>
+  </PropertyGroup>
+  <ImportGroup Label="WdkNuGetProps">
+    <Import Project="$(WadPackagesDir)Microsoft.Windows.SDK.CPP.$(WadWdkVersion)\build\native\Microsoft.Windows.SDK.CPP.props" Condition="Exists('$(WadPackagesDir)Microsoft.Windows.SDK.CPP.$(WadWdkVersion)\build\native\Microsoft.Windows.SDK.CPP.props')" />
+    <Import Project="$(WadPackagesDir)Microsoft.Windows.WDK.x64.$(WadWdkVersion)\build\native\Microsoft.Windows.WDK.x64.props" Condition="Exists('$(WadPackagesDir)Microsoft.Windows.WDK.x64.$(WadWdkVersion)\build\native\Microsoft.Windows.WDK.x64.props')" />
+  </ImportGroup>
+
   <ImportGroup Label="PropertySheets" />
 
   <PropertyGroup>
@@ -93,4 +108,18 @@
 
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.WindowsKernelModeDriver.10.0.targets" Condition="Exists('$(VCTargetsPath)\Microsoft.Cpp.WindowsKernelModeDriver.10.0.targets')" />
+
+  <!-- WDK / SDK NuGet package targets (restored from source/packages.config). -->
+  <ImportGroup Label="WdkNuGetTargets">
+    <Import Project="$(WadPackagesDir)Microsoft.Windows.SDK.CPP.$(WadWdkVersion)\build\native\Microsoft.Windows.SDK.CPP.targets" Condition="Exists('$(WadPackagesDir)Microsoft.Windows.SDK.CPP.$(WadWdkVersion)\build\native\Microsoft.Windows.SDK.CPP.targets')" />
+    <Import Project="$(WadPackagesDir)Microsoft.Windows.WDK.x64.$(WadWdkVersion)\build\native\Microsoft.Windows.WDK.x64.targets" Condition="Exists('$(WadPackagesDir)Microsoft.Windows.WDK.x64.$(WadWdkVersion)\build\native\Microsoft.Windows.WDK.x64.targets')" />
+  </ImportGroup>
+
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <WadWdkPropsPath>$(WadPackagesDir)Microsoft.Windows.WDK.x64.$(WadWdkVersion)\build\native\Microsoft.Windows.WDK.x64.props</WadWdkPropsPath>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(WadWdkPropsPath)')"
+           Text="WDK NuGet package not restored. Run 'nuget restore source/packages.config -PackagesDirectory source/packages' before building. Missing: $(WadWdkPropsPath)" />
+  </Target>
 </Project>
