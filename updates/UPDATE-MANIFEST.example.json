@@ -1,0 +1,25 @@
+{
+  "manifest_version": "1.0",
+  "product": "WindowsAdminDefender",
+  "generated_utc": "2026-09-14T00:00:00Z",
+  "algorithm": "sha256",
+  "description": "Example update/build verification manifest. Every protected build input is listed with its expected SHA-256 digest, computed over the exact file bytes. The verification gate hashes the staged bytes and compares them to these values, failing closed on any mismatch, missing file, or malformed entry. Paths are repository-relative and use forward slashes.",
+  "files": [
+    {
+      "path": "source/WindowsAdminDefender.c",
+      "sha256": "REPLACE_WITH_EXPECTED_SHA256"
+    },
+    {
+      "path": "source/WindowsAdminDefender.h",
+      "sha256": "REPLACE_WITH_EXPECTED_SHA256"
+    },
+    {
+      "path": "source/WindowsAdminDefender.inf",
+      "sha256": "REPLACE_WITH_EXPECTED_SHA256"
+    },
+    {
+      "path": "source/driver-defender.cpp",
+      "sha256": "REPLACE_WITH_EXPECTED_SHA256"
+    }
+  ]
+}
