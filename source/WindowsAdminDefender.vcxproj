@@ -51,6 +51,15 @@
     <ConfigurationType>Driver</ConfigurationType>
     <DriverType>WDM</DriverType>
     <DriverTargetPlatform>Universal</DriverTargetPlatform>
+    <!--
+      CI validates that the driver COMPILES and LINKS. Test-signing and INF
+      verification are packaging steps that need signing certs / tools not
+      present on a hosted runner (recent WDKs also dropped the 32-bit
+      InfVerif.dll). They are disabled here so the build produces the .sys;
+      production packaging performs signing and INF verification separately.
+    -->
+    <SignMode>Off</SignMode>
+    <InfVerif_EnableVerification>false</InfVerif_EnableVerification>
   </PropertyGroup>
 
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />

@@ -108,7 +108,7 @@ jobs:
             /m `
             /p:Configuration=${{ matrix.configuration }} `
             /p:Platform=${{ matrix.platform }} `
-            /p:RunInfVerif=false `
+            /p:SignMode=Off `
             /p:InfVerif_EnableVerification=false `
             /p:OutDir=$env:GITHUB_WORKSPACE\build\out\${{ matrix.platform }}\${{ matrix.configuration }}\
           if ($LASTEXITCODE -ne 0) { throw "Driver build failed ($LASTEXITCODE)." }
