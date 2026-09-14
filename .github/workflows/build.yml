@@ -71,13 +71,41 @@ jobs:
       # The driver build is allowed to fail the job loudly, but is isolated so
       # its status is unambiguous in the log. It requires the WDK's
       # WindowsKernelModeDriver10.0 platform toolset to be present.
+      - name: Locate WDK tools (stampinf, etc.) from NuGet package
+        id: wdktools
+        shell: pwsh
+        run: |
+          # The WDK NuGet package ships the build tools (stampinf.exe, etc.)
+          # under bin\<version>\<arch>. The StampInf MSBuild task needs them on
+          # PATH. Find the stampinf.exe that matches the build platform.
+          $binRoot = Get-ChildItem -Path source/packages -Recurse -Filter stampinf.exe -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -match '\\${{ matrix.platform }}\\' } |
+            Select-Object -First 1
+          if (-not $binRoot) {
+            $binRoot = Get-ChildItem -Path source/packages -Recurse -Filter stampinf.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+          }
+          if ($binRoot) {
+            $dir = Split-Path -Parent $binRoot.FullName
+            Write-Host "Found WDK tools at: $dir"
+            "bindir=$dir" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          } else {
+            Write-Warning "stampinf.exe not found under source/packages; INF stamping will be disabled."
+            "bindir=" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          }
+
       - name: Build kernel minifilter driver (WindowsAdminDefender.sys)
         shell: pwsh
         run: |
+          $bindir = "${{ steps.wdktools.outputs.bindir }}"
+          if ($bindir) { $env:PATH = "$bindir;$env:PATH" }
+          # If tools were not found, skip INF stamping so the compile/link is
+          # still exercised (this is a build validation, not a signed package).
+          $stampArg = if ($bindir) { "/p:StampInf=true" } else { "/p:StampInf=false" }
           msbuild source/WindowsAdminDefender.vcxproj `
             /m `
             /p:Configuration=${{ matrix.configuration }} `
             /p:Platform=${{ matrix.platform }} `
+            $stampArg `
             /p:OutDir=$env:GITHUB_WORKSPACE\build\out\${{ matrix.platform }}\${{ matrix.configuration }}\
           if ($LASTEXITCODE -ne 0) { throw "Driver build failed ($LASTEXITCODE)." }
 
