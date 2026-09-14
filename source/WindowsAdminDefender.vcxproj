@@ -59,7 +59,14 @@
       production packaging performs signing and INF verification separately.
     -->
     <SignMode>Off</SignMode>
+    <!-- Post-build package validators that need tools/DLLs not present on a
+         hosted CI runner (InfVerif needs the 32-bit InfVerif.dll; ApiValidator
+         validates universal DDIs). They run after link, so disabling them does
+         not affect the compile/link validation this job performs. -->
     <InfVerif_EnableVerification>false</InfVerif_EnableVerification>
+    <RunInfVerif>false</RunInfVerif>
+    <ApiValidator_Enable>false</ApiValidator_Enable>
+    <DoRunApiValidator>false</DoRunApiValidator>
   </PropertyGroup>
 
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
