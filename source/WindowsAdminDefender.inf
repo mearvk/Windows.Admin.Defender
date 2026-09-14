@@ -1,0 +1,54 @@
+[Version]
+Signature = "$WINDOWS NT$"
+Class = System
+ClassGuid = {78A1C341-4539-11D3-B88D-00C04FAD5171}
+Provider = %ProviderName%
+DriverVer = 09/13/2026,1.0.0.0
+CatalogFile = WindowsAdminDefender.cat
+
+[DefaultInstall.NTamd64]
+CopyFiles = DriverCopyFiles
+
+[DefaultInstall.NTamd64.Services]
+AddService = WindowsAdminDefender,0x00000002,WindowsAdminDefender_Service
+
+[DefaultInstall.NTarm64]
+CopyFiles = DriverCopyFiles
+
+[DefaultInstall.NTarm64.Services]
+AddService = WindowsAdminDefender,0x00000002,WindowsAdminDefender_Service
+
+[Manufacturer]
+%ProviderName% = Standard,NTamd64,NTarm64
+
+[Standard.NTamd64]
+%DeviceName% = DriverInstall, Root\\WindowsAdminDefender
+
+[Standard.NTarm64]
+%DeviceName% = DriverInstall, Root\\WindowsAdminDefender
+
+[DriverInstall]
+CopyFiles = DriverCopyFiles
+
+[DriverInstall.Services]
+AddService = WindowsAdminDefender,0x00000002,WindowsAdminDefender_Service
+
+[WindowsAdminDefender_Service]
+DisplayName = %ServiceName%
+Description = %ServiceDescription%
+ServiceType = 1
+StartType = 2
+ErrorControl = 1
+ServiceBinary = %13%\\WindowsAdminDefender.sys
+
+[DestinationDirs]
+DriverCopyFiles = 13
+
+[DriverCopyFiles]
+WindowsAdminDefender.sys
+
+[Strings]
+ProviderName = "Windows Admin Defender"
+DeviceName = "Windows Admin Defender Kernel Driver"
+ServiceName = "Windows Admin Defender Kernel Driver"
+ServiceDescription = "Windows Admin Defender kernel-mode software driver."
