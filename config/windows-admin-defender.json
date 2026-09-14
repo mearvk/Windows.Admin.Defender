@@ -1,0 +1,11 @@
+{
+  "protected_store": {
+    "enabled": true,
+    "root": "%ProgramData%\\WindowsAdminDefender\\store",
+    "mode": "stored-protected",
+    "deduplicate_by_sha256": true,
+    "preserve_source_metadata": true,
+    "copy_live_system_files": false,
+    "allow_explicit_store_command": true
+  }
+}
