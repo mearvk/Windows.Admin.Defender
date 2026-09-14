@@ -1,0 +1,64 @@
+{
+  "windows_12_system_folders": {
+    "core_operating_system_and_modular_directories": [
+      {
+        "path": "C:\\Windows",
+        "description": "The base operating system folder containing vital execution resources, system configurations, and modular core deployment assets."
+      },
+      {
+        "path": "C:\\Windows\\System32",
+        "description": "The critical 64-bit subsystem repository housing native kernel libraries, drivers, execution components, and command utilities."
+      },
+      {
+        "path": "C:\\Windows\\SysWOW64",
+        "description": "The core system emulation directory designed to isolate and run legacy 32-bit processes safely on the 64-bit platform architecture."
+      },
+      {
+        "path": "C:\\Windows\\WinSxS",
+        "description": "The native Component Store which acts as a fallback library cache to handle on-demand feature deployments and roll back modern system changes safely."
+      }
+    ],
+    "application_packages_and_deployment_directories": [
+      {
+        "path": "C:\\Program Files",
+        "description": "The production directory for native 64-bit system programs, integrated utilities, and corporate enterprise desktop applications."
+      },
+      {
+        "path": "C:\\Program Files (x86)",
+        "description": "The dedicated fallback execution environment path for traditional 32-bit desktop software modules."
+      },
+      {
+        "path": "C:\\Program Files\\WindowsApps",
+        "description": "A deeply protected, hidden system directory housing Universal Windows Platform (UWP) packages, modern feature frameworks, and advanced user interface modules."
+      },
+      {
+        "path": "C:\\ProgramData",
+        "description": "A hidden global repository storing localized app settings, persistent states, caches, and initialization files shared across all users."
+      }
+    ],
+    "user_profiles_and_isolated_identities": [
+      {
+        "path": "C:\\Users",
+        "description": "The root root structure protecting discrete user accounts, personal settings, and customized layout parameters."
+      },
+      {
+        "path": "C:\\Users\\[Username]\\AppData",
+        "description": "A hidden directory isolating user-specific environment variables and localized software contexts divided into Local, LocalLow, and Roaming configurations."
+      }
+    ],
+    "maintenance_recovery_and_storage_structures": [
+      {
+        "path": "C:\\System Volume Information",
+        "description": "A secure system storage path containing partition tracking information, shadow copy files, and background search index logs."
+      },
+      {
+        "path": "C:\\Recovery",
+        "description": "The automated partition infrastructure containing emergency boot tools and operating system diagnostic/repair images."
+      },
+      {
+        "path": "C:\\$Recycle.Bin",
+        "description": "The local hardware partition bin which acts as a sandboxed staging directory managing files prior to permanent physical storage optimization."
+      }
+    ]
+  }
+}
