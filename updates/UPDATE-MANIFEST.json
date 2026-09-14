@@ -1,0 +1,25 @@
+{
+  "manifest_version": "1.0",
+  "product": "WindowsAdminDefender",
+  "generated_utc": "2026-09-14T00:00:00Z",
+  "algorithm": "sha256",
+  "description": "Verification manifest for the protected build inputs. Each digest is the SHA-256 of the exact file bytes. build/verify.ps1 hashes the staged bytes and compares them to these values, failing closed on any mismatch, missing file, or malformed entry. Regenerate these digests whenever a listed file changes.",
+  "files": [
+    {
+      "path": "source/WindowsAdminDefender.c",
+      "sha256": "71e054c374e3b42b96bc7fe4bc3289cbf4c34920a0d668b0c56b72cc403a3501"
+    },
+    {
+      "path": "source/WindowsAdminDefender.h",
+      "sha256": "c7b8316d84f106b5223cca959ca3244902029d31228fd2f25ac42606d0ff3e60"
+    },
+    {
+      "path": "source/WindowsAdminDefender.inf",
+      "sha256": "91a10cb20ed70b2005fee3de2609af8cfe50cde8b2652a3b8c94a41011d80113"
+    },
+    {
+      "path": "source/driver-defender.cpp",
+      "sha256": "38450f9d0420361f3e42916906577f0351fd76747692d547e15d3d4b00b42884"
+    }
+  ]
+}
