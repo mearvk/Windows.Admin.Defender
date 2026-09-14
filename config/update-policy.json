@@ -1,0 +1,31 @@
+{
+  "update_policy": {
+    "check_interval_hours": 24,
+    "sources": {
+      "https_endpoint": null,
+      "local_directory": null
+    },
+    "verification": {
+      "algorithm": "sha256",
+      "require_manifest": true,
+      "fail_closed": true,
+      "verify_before_build": true,
+      "verify_before_execution": true,
+      "verify_before_diagnostics": true,
+      "require_authenticode_publisher": false,
+      "notes": "SHA-256 proves integrity against the expected digest; it does not establish publisher identity. Production unattended updates should additionally require a trusted Authenticode publisher policy."
+    },
+    "manifest": {
+      "path": "updates/UPDATE-MANIFEST.json",
+      "example": "updates/UPDATE-MANIFEST.example.json"
+    },
+    "security_boundary": {
+      "bypass_secure_boot": false,
+      "bypass_defender": false,
+      "bypass_code_integrity": false,
+      "bypass_uac": false,
+      "bypass_driver_signing": false,
+      "installation_mechanism": "windows-driver-store-pnputil"
+    }
+  }
+}
