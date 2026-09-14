@@ -1,0 +1,64 @@
+{
+  "windows_11_system_folders": {
+    "core_operating_system_directories": [
+      {
+        "path": "C:\\Windows",
+        "description": "The primary installation folder for Windows 11 containing the central binaries, settings, and native tools."
+      },
+      {
+        "path": "C:\\Windows\\System32",
+        "description": "The critical subsystem repository housing 64-bit kernel files, essential device drivers, and system .dll libraries."
+      },
+      {
+        "path": "C:\\Windows\\SysWOW64",
+        "description": "The emulation layer folder allowing legacy 32-bit software and processes to run securely on 64-bit Windows 11."
+      },
+      {
+        "path": "C:\\Windows\\WinSxS",
+        "description": "The Component Store, which caches multiple versions of system modifications, handling features on demand and Windows Update rollbacks."
+      }
+    ],
+    "modern_and_classic_application_directories": [
+      {
+        "path": "C:\\Program Files",
+        "description": "The standard directory where native 64-bit applications place their primary components and binaries."
+      },
+      {
+        "path": "C:\\Program Files (x86)",
+        "description": "The default installation fallback path dedicated exclusively to 32-bit traditional desktop programs."
+      },
+      {
+        "path": "C:\\Program Files\\WindowsApps",
+        "description": "A highly secured, hidden folder storing Modern Universal Windows Platform (UWP) apps and native Windows 11 features like the redesigned Start Menu and Taskbar packages."
+      },
+      {
+        "path": "C:\\ProgramData",
+        "description": "A hidden global folder used by applications to cache configuration properties, updates, and data shared among all local users."
+      }
+    ],
+    "profile_and_local_configuration_directories": [
+      {
+        "path": "C:\\Users",
+        "description": "The structural root for all user accounts, protecting unique documents, layouts, and system configurations."
+      },
+      {
+        "path": "C:\\Users\\[Username]\\AppData",
+        "description": "A hidden user folder containing isolated application contexts divided into Local, LocalLow, and Roaming structures."
+      }
+    ],
+    "critical_storage_and_repair_directories": [
+      {
+        "path": "C:\\System Volume Information",
+        "description": "A restricted folder managing volume metadata, security descriptors, search indexes, and System Restore points."
+      },
+      {
+        "path": "C:\\Recovery",
+        "description": "Holds the local recovery environment tools used to launch automatic repairs if Windows 11 fails to boot."
+      },
+      {
+        "path": "C:\\$Recycle.Bin",
+        "description": "The system directory that temporarily caches discarded files for every storage partition before deletion."
+      }
+    ]
+  }
+}
