@@ -1,0 +1,14 @@
+[
+  { "version": "Windows 12", "release_year": "Unreleased/Hypothetical" },
+  { "version": "Windows 11", "release_year": 2021 },
+  { "version": "Windows 10", "release_year": 2015 },
+  { "version": "Windows 8.1", "release_year": 2013 },
+  { "version": "Windows 8", "release_year": 2012 },
+  { "version": "Windows 7", "release_year": 2009 },
+  { "version": "Windows Vista", "release_year": 2007 },
+  { "version": "Windows XP", "release_year": 2001 },
+  { "version": "Windows ME", "release_year": 2000 },
+  { "version": "Windows 2000", "release_year": 2000 },
+  { "version": "Windows 98", "release_year": 1998 },
+  { "version": "Windows 95", "release_year": 1995 }
+]
