@@ -8,12 +8,14 @@ CatalogFile = WindowsAdminDefender.cat
 
 [DefaultInstall.NTamd64]
 CopyFiles = DriverCopyFiles
+AddReg = MiniFilter.AddReg
 
 [DefaultInstall.NTamd64.Services]
 AddService = WindowsAdminDefender,0x00000002,WindowsAdminDefender_Service
 
 [DefaultInstall.NTarm64]
 CopyFiles = DriverCopyFiles
+AddReg = MiniFilter.AddReg
 
 [DefaultInstall.NTarm64.Services]
 AddService = WindowsAdminDefender,0x00000002,WindowsAdminDefender_Service
@@ -29,6 +31,7 @@ AddService = WindowsAdminDefender,0x00000002,WindowsAdminDefender_Service
 
 [DriverInstall]
 CopyFiles = DriverCopyFiles
+AddReg = MiniFilter.AddReg
 
 [DriverInstall.Services]
 AddService = WindowsAdminDefender,0x00000002,WindowsAdminDefender_Service
@@ -36,10 +39,16 @@ AddService = WindowsAdminDefender,0x00000002,WindowsAdminDefender_Service
 [WindowsAdminDefender_Service]
 DisplayName = %ServiceName%
 Description = %ServiceDescription%
-ServiceType = 1
-StartType = 2
+ServiceType = 2
+StartType = 3
 ErrorControl = 1
 ServiceBinary = %13%\\WindowsAdminDefender.sys
+LoadOrderGroup = "FSFilter Activity Monitor"
+
+[MiniFilter.AddReg]
+HKR, "Instances", "DefaultInstance", 0x00000000, "Windows Admin Defender Instance"
+HKR, "Instances\\Windows Admin Defender Instance", "Altitude", 0x00000000, "370030"
+HKR, "Instances\\Windows Admin Defender Instance", "Flags", 0x00010001, 0
 
 [DestinationDirs]
 DriverCopyFiles = 13
@@ -49,6 +58,6 @@ WindowsAdminDefender.sys
 
 [Strings]
 ProviderName = "Windows Admin Defender"
-DeviceName = "Windows Admin Defender Kernel Driver"
-ServiceName = "Windows Admin Defender Kernel Driver"
-ServiceDescription = "Windows Admin Defender kernel-mode software driver."
+DeviceName = "Windows Admin Defender File-System Minifilter"
+ServiceName = "Windows Admin Defender File-System Minifilter"
+ServiceDescription = "Windows Admin Defender directory-handle protection file-system minifilter."
