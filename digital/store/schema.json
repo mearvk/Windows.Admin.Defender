@@ -1,0 +1,31 @@
+{
+  "store": "WindowsAdminDefender",
+  "mode": "stored-protected",
+  "default_enabled": true,
+  "object_identity": "sha256",
+  "tables": {
+    "objects": {
+      "primary_key": "sha256",
+      "columns": ["sha256", "size", "created_utc", "object_path"]
+    },
+    "sources": {
+      "primary_key": "source_id",
+      "columns": ["source_id", "normalized_path", "classification", "windows_build"]
+    },
+    "references": {
+      "primary_key": "reference_id",
+      "columns": ["reference_id", "sha256", "source_id", "observed_utc", "attributes"]
+    },
+    "integrity": {
+      "primary_key": "sha256",
+      "columns": ["sha256", "verified_utc", "verification_status"]
+    }
+  },
+  "filesystem": {
+    "root": "%ProgramData%\\WindowsAdminDefender\\store",
+    "catalog": "catalog.jsonl",
+    "objects": "objects\\<sha256>",
+    "metadata": "metadata\\<sha256>.json"
+  },
+  "restore_policy": "explicit-supported-windows-procedure-only"
+}
