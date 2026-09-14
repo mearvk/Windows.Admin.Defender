@@ -1,0 +1,60 @@
+{
+  "windows_10_system_folders": {
+    "core_operating_system_directories": [
+      {
+        "path": "C:\\Windows",
+        "description": "The central nervous system of your PC. It houses the critical system files, background components, and execution binaries required for Windows to function."
+      },
+      {
+        "path": "C:\\Windows\\System32",
+        "description": "Located inside the main directory, this contains the core .dll (Dynamic Link Library) files and .exe applications essential for the Windows kernel and subsystem utilities."
+      },
+      {
+        "path": "C:\\Windows\\SysWOW64",
+        "description": "On 64-bit systems, this folder handles the execution of legacy 32-bit software, allowing older applications to run smoothly alongside 64-bit architecture."
+      },
+      {
+        "path": "C:\\Windows\\WinSxS",
+        "description": "Known as the Component Store, it contains library files used to manage Windows updates, resolve software conflicts, and reverse system alterations."
+      }
+    ],
+    "application_and_shared_data_directories": [
+      {
+        "path": "C:\\Program Files",
+        "description": "The default storage directory where standard 64-bit applications install their files, executables, and supporting assets."
+      },
+      {
+        "path": "C:\\Program Files (x86)",
+        "description": "Found on 64-bit versions of Windows, this acts as the dedicated installation path for 32-bit third-party applications."
+      },
+      {
+        "path": "C:\\ProgramData",
+        "description": "A hidden system folder that applications use to save settings, licensing profiles, updates, and configuration data shared across all users on the PC."
+      }
+    ],
+    "user_profile_directories": [
+      {
+        "path": "C:\\Users",
+        "description": "Holds all user profile directories created on the computer."
+      },
+      {
+        "path": "C:\\Users\\[Username]\\AppData",
+        "description": "A hidden subdirectory under each user profile that isolates specific user application settings across three sub-folders: Local, LocalLow, and Roaming."
+      }
+    ],
+    "hidden_system_and_maintenance_directories": [
+      {
+        "path": "C:\\System Volume Information",
+        "description": "A highly protected system folder used for storing system restore points, volume shadow copies, and search indexing databases."
+      },
+      {
+        "path": "C:\\Recovery",
+        "description": "Holds the local Windows Recovery Environment (WinRE) resources used to repair or reset the machine during boot failure."
+      },
+      {
+        "path": "C:\\$Recycle.Bin",
+        "description": "A hidden system folder present on every drive partition that handles deleted files before they are permanently purged."
+      }
+    ]
+  }
+}
