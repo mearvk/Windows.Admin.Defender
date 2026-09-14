@@ -62,23 +62,30 @@
     the WDK is not installed as a machine-wide Visual Studio extension, e.g. on
     hosted CI runners. Paths follow the standard NuGet packages\ layout.
   -->
+  <!-- Discover the restored package directories by glob so the exact patch
+       version (which differs between the WDK and SDK packages) does not have
+       to be hard-coded. The globs are resolved into properties because an
+       <Import> Condition cannot reference an item list (@(...)) directly. -->
   <PropertyGroup Label="WdkNuGet">
-    <!-- WadPackagesDir and WadWdkVersion can be overridden on the MSBuild
-         command line (the CI resolves the exact restored version). The glob
-         fallbacks below also locate the packages if only the directory is set. -->
+    <!-- WadPackagesDir can be overridden on the MSBuild command line; CI passes
+         the restore output directory. -->
     <WadPackagesDir Condition="'$(WadPackagesDir)' == ''">$(MSBuildThisFileDirectory)..\packages\</WadPackagesDir>
   </PropertyGroup>
-  <!-- Discover the restored package directories by glob so the exact patch
-       version does not have to be hard-coded (WDK and SDK version separately). -->
   <ItemGroup>
-    <WadWdkPropsFile Include="$(WadPackagesDir)Microsoft.Windows.WDK.x64.*\build\native\Microsoft.Windows.WDK.x64.props" />
-    <WadWdkTargetsFile Include="$(WadPackagesDir)Microsoft.Windows.WDK.x64.*\build\native\Microsoft.Windows.WDK.x64.targets" />
-    <WadSdkPropsFile Include="$(WadPackagesDir)Microsoft.Windows.SDK.CPP.*\build\native\Microsoft.Windows.SDK.CPP.props" />
-    <WadSdkTargetsFile Include="$(WadPackagesDir)Microsoft.Windows.SDK.CPP.*\build\native\Microsoft.Windows.SDK.CPP.targets" />
+    <WadWdkPropsItem Include="$(WadPackagesDir)Microsoft.Windows.WDK.x64.*\build\native\Microsoft.Windows.WDK.x64.props" />
+    <WadWdkTargetsItem Include="$(WadPackagesDir)Microsoft.Windows.WDK.x64.*\build\native\Microsoft.Windows.WDK.x64.targets" />
+    <WadSdkPropsItem Include="$(WadPackagesDir)Microsoft.Windows.SDK.CPP.*\build\native\Microsoft.Windows.SDK.CPP.props" />
+    <WadSdkTargetsItem Include="$(WadPackagesDir)Microsoft.Windows.SDK.CPP.*\build\native\Microsoft.Windows.SDK.CPP.targets" />
   </ItemGroup>
+  <PropertyGroup>
+    <WadWdkProps>@(WadWdkPropsItem)</WadWdkProps>
+    <WadWdkTargets>@(WadWdkTargetsItem)</WadWdkTargets>
+    <WadSdkProps>@(WadSdkPropsItem)</WadSdkProps>
+    <WadSdkTargets>@(WadSdkTargetsItem)</WadSdkTargets>
+  </PropertyGroup>
   <ImportGroup Label="WdkNuGetProps">
-    <Import Project="@(WadSdkPropsFile)" Condition="'@(WadSdkPropsFile)' != ''" />
-    <Import Project="@(WadWdkPropsFile)" Condition="'@(WadWdkPropsFile)' != ''" />
+    <Import Project="$(WadSdkProps)" Condition="'$(WadSdkProps)' != '' and Exists('$(WadSdkProps)')" />
+    <Import Project="$(WadWdkProps)" Condition="'$(WadWdkProps)' != '' and Exists('$(WadWdkProps)')" />
   </ImportGroup>
 
   <ImportGroup Label="PropertySheets" />
@@ -121,12 +128,12 @@
 
   <!-- WDK / SDK NuGet package targets (restored under $(WadPackagesDir)). -->
   <ImportGroup Label="WdkNuGetTargets">
-    <Import Project="@(WadSdkTargetsFile)" Condition="'@(WadSdkTargetsFile)' != ''" />
-    <Import Project="@(WadWdkTargetsFile)" Condition="'@(WadWdkTargetsFile)' != ''" />
+    <Import Project="$(WadSdkTargets)" Condition="'$(WadSdkTargets)' != '' and Exists('$(WadSdkTargets)')" />
+    <Import Project="$(WadWdkTargets)" Condition="'$(WadWdkTargets)' != '' and Exists('$(WadWdkTargets)')" />
   </ImportGroup>
 
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <Error Condition="'@(WadWdkPropsFile)' == ''"
+    <Error Condition="'$(WadWdkProps)' == '' or !Exists('$(WadWdkProps)')"
            Text="WDK NuGet package not restored under $(WadPackagesDir). Run 'nuget install Microsoft.Windows.WDK.x64 -OutputDirectory source/packages' before building." />
   </Target>
 </Project>
