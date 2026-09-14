@@ -1,4 +1,9 @@
-#include <ntddk.h>
+/*
+ * fltKernel.h is the file-system minifilter header. It transitively includes
+ * ntifs.h and provides the kernel definitions this driver needs. Do NOT also
+ * include ntddk.h: including both pulls conflicting definitions of PEPROCESS/
+ * PETHREAD (ntifs.h vs. ntddk.h) and fails to compile.
+ */
 #include <fltKernel.h>
 #include "WindowsAdminDefender.h"
 
@@ -111,23 +116,22 @@ static CONST FLT_OPERATION_REGISTRATION gCallbacks[] = {
 };
 
 static CONST FLT_REGISTRATION gRegistration = {
-    sizeof(FLT_REGISTRATION),
-    FLT_REGISTRATION_VERSION,
-    0,
-    NULL,
-    gCallbacks,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    sizeof(FLT_REGISTRATION),           /* Size */
+    FLT_REGISTRATION_VERSION,           /* Version */
+    0,                                  /* Flags */
+    NULL,                               /* ContextRegistration */
+    gCallbacks,                         /* OperationRegistration */
+    NULL,                               /* FilterUnloadCallback */
+    NULL,                               /* InstanceSetupCallback */
+    NULL,                               /* InstanceQueryTeardownCallback */
+    NULL,                               /* InstanceTeardownStartCallback */
+    NULL,                               /* InstanceTeardownCompleteCallback */
+    NULL,                               /* GenerateFileNameCallback */
+    NULL,                               /* NormalizeNameComponentCallback */
+    NULL,                               /* NormalizeContextCleanupCallback */
+    NULL,                               /* TransactionNotificationCallback */
+    NULL,                               /* NormalizeNameComponentExCallback */
+    NULL                                /* SectionNotificationCallback */
 };
 
 NTSTATUS DriverEntry(_In_ PDRIVER_OBJECT DriverObject,

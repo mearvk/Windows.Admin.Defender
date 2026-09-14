@@ -7,7 +7,7 @@
   "files": [
     {
       "path": "source/WindowsAdminDefender.c",
-      "sha256": "71e054c374e3b42b96bc7fe4bc3289cbf4c34920a0d668b0c56b72cc403a3501"
+      "sha256": "edf8b86527275c9c4c0e5c4001735cf013fc3d367cf79620b16d876c87247f15"
     },
     {
       "path": "source/WindowsAdminDefender.h",
