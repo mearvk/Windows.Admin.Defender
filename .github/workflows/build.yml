@@ -42,23 +42,14 @@ jobs:
       # acquire via the official WDK/SDK NuGet packages rather than a
       # machine-wide Visual Studio extension. This is Microsoft's supported
       # CI/CD path (see install-the-wdk-using-nuget).
-      - name: Resolve and restore WDK/SDK NuGet packages
-        id: wdk
+      - name: Restore WDK/SDK NuGet packages
         shell: pwsh
         run: |
-          # The WDK NuGet package versions its patch number independently of the
-          # SDK, so resolve the latest available WDK version from the feed and
-          # install it (its matching SDK dependency is pulled automatically).
-          $pkg = "Microsoft.Windows.WDK.x64"
-          $index = Invoke-RestMethod "https://api.nuget.org/v3-flatcontainer/$($pkg.ToLower())/index.json"
-          $version = ($index.versions | Where-Object { $_ -notmatch '-' } | Select-Object -Last 1)
-          if (-not $version) { throw "Could not resolve a stable version of $pkg." }
-          Write-Host "Resolved $pkg version: $version"
-          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-
-          New-Item -ItemType Directory -Force -Path source/packages | Out-Null
-          nuget install $pkg -Version $version -OutputDirectory source/packages -DependencyVersion Highest
-          if ($LASTEXITCODE -ne 0) { throw "NuGet install failed ($LASTEXITCODE)." }
+          # Versions are pinned in source/packages.config (all aligned, matching
+          # Microsoft's driver-samples configuration). The solution-level
+          # source/Directory.Build.props imports the restored package props.
+          nuget restore source/packages.config -PackagesDirectory source/packages
+          if ($LASTEXITCODE -ne 0) { throw "NuGet restore failed ($LASTEXITCODE)." }
           Write-Host "Restored packages:"
           Get-ChildItem source/packages -Directory | Select-Object Name | Format-Table -AutoSize
 
@@ -83,12 +74,10 @@ jobs:
       - name: Build kernel minifilter driver (WindowsAdminDefender.sys)
         shell: pwsh
         run: |
-          $pkgDir = "$env:GITHUB_WORKSPACE\source\packages\"
           msbuild source/WindowsAdminDefender.vcxproj `
             /m `
             /p:Configuration=${{ matrix.configuration }} `
             /p:Platform=${{ matrix.platform }} `
-            /p:WadPackagesDir=$pkgDir `
             /p:OutDir=$env:GITHUB_WORKSPACE\build\out\${{ matrix.platform }}\${{ matrix.configuration }}\
           if ($LASTEXITCODE -ne 0) { throw "Driver build failed ($LASTEXITCODE)." }
 

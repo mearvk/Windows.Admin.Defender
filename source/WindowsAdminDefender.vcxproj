@@ -3,12 +3,12 @@
   WindowsAdminDefender.vcxproj
   WDK file-system minifilter (kernel-mode) project for source/WindowsAdminDefender.c.
 
-  This project targets the Windows Driver Kit (WDK) "WindowsKernelModeDriver"
-  configuration. It requires the WDK to be installed alongside Visual Studio so
-  the WDK MSBuild targets ($(WDKContentRoot)) and Filter Manager (fltMgr.lib)
-  are available. It does not disable driver-signing policy, Secure Boot,
-  Defender, Device Guard, or UAC. Catalog generation and signing remain a
-  separate, explicit packaging step.
+  The WDK/SDK are supplied via NuGet packages imported by the solution-level
+  Directory.Build.props (restored under source/packages). This is Microsoft's
+  supported CI/CD path and avoids requiring a machine-wide WDK Visual Studio
+  extension. It does not disable driver-signing policy, Secure Boot, Defender,
+  Device Guard, or UAC. Catalog generation and signing remain a separate,
+  explicit packaging step.
 -->
 <Project DefaultTargets="Build" ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
@@ -54,39 +54,6 @@
   </PropertyGroup>
 
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.WindowsKernelModeDriver.10.0.props" Condition="Exists('$(VCTargetsPath)\Microsoft.Cpp.WindowsKernelModeDriver.10.0.props')" />
-
-  <!--
-    WDK / SDK NuGet package props (restored from source/packages.config).
-    These supply the kernel headers (ntddk.h, fltKernel.h) and libraries when
-    the WDK is not installed as a machine-wide Visual Studio extension, e.g. on
-    hosted CI runners. Paths follow the standard NuGet packages\ layout.
-  -->
-  <!-- Discover the restored package directories by glob so the exact patch
-       version (which differs between the WDK and SDK packages) does not have
-       to be hard-coded. The globs are resolved into properties because an
-       <Import> Condition cannot reference an item list (@(...)) directly. -->
-  <PropertyGroup Label="WdkNuGet">
-    <!-- WadPackagesDir can be overridden on the MSBuild command line; CI passes
-         the restore output directory. -->
-    <WadPackagesDir Condition="'$(WadPackagesDir)' == ''">$(MSBuildThisFileDirectory)..\packages\</WadPackagesDir>
-  </PropertyGroup>
-  <ItemGroup>
-    <WadWdkPropsItem Include="$(WadPackagesDir)Microsoft.Windows.WDK.x64.*\build\native\Microsoft.Windows.WDK.x64.props" />
-    <WadWdkTargetsItem Include="$(WadPackagesDir)Microsoft.Windows.WDK.x64.*\build\native\Microsoft.Windows.WDK.x64.targets" />
-    <WadSdkPropsItem Include="$(WadPackagesDir)Microsoft.Windows.SDK.CPP.*\build\native\Microsoft.Windows.SDK.CPP.props" />
-    <WadSdkTargetsItem Include="$(WadPackagesDir)Microsoft.Windows.SDK.CPP.*\build\native\Microsoft.Windows.SDK.CPP.targets" />
-  </ItemGroup>
-  <PropertyGroup>
-    <WadWdkProps>@(WadWdkPropsItem)</WadWdkProps>
-    <WadWdkTargets>@(WadWdkTargetsItem)</WadWdkTargets>
-    <WadSdkProps>@(WadSdkPropsItem)</WadSdkProps>
-    <WadSdkTargets>@(WadSdkTargetsItem)</WadSdkTargets>
-  </PropertyGroup>
-  <ImportGroup Label="WdkNuGetProps">
-    <Import Project="$(WadSdkProps)" Condition="'$(WadSdkProps)' != '' and Exists('$(WadSdkProps)')" />
-    <Import Project="$(WadWdkProps)" Condition="'$(WadWdkProps)' != '' and Exists('$(WadWdkProps)')" />
-  </ImportGroup>
 
   <ImportGroup Label="PropertySheets" />
 
@@ -106,7 +73,7 @@
     </ClCompile>
     <Link>
       <!-- Filter Manager import library for the minifilter APIs used in DriverEntry. -->
-      <AdditionalDependencies>$(DDK_LIB_PATH)fltMgr.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>fltMgr.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Inf>
       <SpecifyDriverVerDirectiveVersion>true</SpecifyDriverVerDirectiveVersion>
@@ -124,16 +91,4 @@
   </ItemGroup>
 
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.WindowsKernelModeDriver.10.0.targets" Condition="Exists('$(VCTargetsPath)\Microsoft.Cpp.WindowsKernelModeDriver.10.0.targets')" />
-
-  <!-- WDK / SDK NuGet package targets (restored under $(WadPackagesDir)). -->
-  <ImportGroup Label="WdkNuGetTargets">
-    <Import Project="$(WadSdkTargets)" Condition="'$(WadSdkTargets)' != '' and Exists('$(WadSdkTargets)')" />
-    <Import Project="$(WadWdkTargets)" Condition="'$(WadWdkTargets)' != '' and Exists('$(WadWdkTargets)')" />
-  </ImportGroup>
-
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <Error Condition="'$(WadWdkProps)' == '' or !Exists('$(WadWdkProps)')"
-           Text="WDK NuGet package not restored under $(WadPackagesDir). Run 'nuget install Microsoft.Windows.WDK.x64 -OutputDirectory source/packages' before building." />
-  </Target>
 </Project>
