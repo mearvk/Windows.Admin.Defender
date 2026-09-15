@@ -47,3 +47,8 @@ Installation uses the Windows Driver Store and PnPUtil. The project does not byp
 - `source/WindowsAdminDefender.c` — file-system minifilter.
 - `source/WindowsAdminDefender.h` — driver definitions.
 - `source/driver-defender.cpp` — administrator utility.
+
+## Glossary
+
+Definitions of the WDK, driver, build/CI, and project-specific terms used
+throughout this repository are collected in [`GLOSSARY.md`](GLOSSARY.md).
