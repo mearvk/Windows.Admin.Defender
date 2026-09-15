@@ -15,7 +15,7 @@
     },
     {
       "path": "source/WindowsAdminDefender.inf",
-      "sha256": "91a10cb20ed70b2005fee3de2609af8cfe50cde8b2652a3b8c94a41011d80113"
+      "sha256": "706386dce3ce43bd5ce6785350a431e9382216f915bc90aba14e5819f90e66ef"
     },
     {
       "path": "source/driver-defender.cpp",

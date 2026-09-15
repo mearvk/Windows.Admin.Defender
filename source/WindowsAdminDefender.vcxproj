@@ -67,6 +67,11 @@
     <RunInfVerif>false</RunInfVerif>
     <ApiValidator_Enable>false</ApiValidator_Enable>
     <DoRunApiValidator>false</DoRunApiValidator>
+    <!-- Catalog generation (Inf2Cat) is a packaging step tied to signing and
+         is performed separately; it also needs the 32-bit InfVerif.dll. Skip
+         it here so CI validates compile + link + INF stamping only. -->
+    <GenerateCatalog>false</GenerateCatalog>
+    <EnableInf2cat>false</EnableInf2cat>
   </PropertyGroup>
 
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
