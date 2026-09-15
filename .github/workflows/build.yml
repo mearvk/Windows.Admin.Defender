@@ -1,0 +1,133 @@
+name: Windows WDK Build
+
+# Compiles Windows Admin Defender on a Windows runner with the WDK.
+# Runs the fail-closed SHA-256 verification gate first, then builds the
+# user-mode utility (standard SDK) and the kernel minifilter driver (WDK).
+#
+# No signing-policy, Secure Boot, Defender, Device Guard, or UAC bypass is
+# performed. Catalog generation and production signing remain separate steps.
+
+on:
+  push:
+    branches: [main, master, ci-windows-wdk-build]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build (${{ matrix.platform }} / ${{ matrix.configuration }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [x64]
+        configuration: [Release]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Add NuGet to PATH
+        uses: nuget/setup-nuget@v2
+
+      # The user-mode utility only needs the standard Windows SDK (present on
+      # the runner). The kernel driver additionally needs the WDK, which we
+      # acquire via the official WDK/SDK NuGet packages rather than a
+      # machine-wide Visual Studio extension. This is Microsoft's supported
+      # CI/CD path (see install-the-wdk-using-nuget).
+      - name: Restore WDK/SDK NuGet packages
+        shell: pwsh
+        run: |
+          # Versions are pinned in source/packages.config (all aligned, matching
+          # Microsoft's driver-samples configuration). The solution-level
+          # source/Directory.Build.props imports the restored package props.
+          nuget restore source/packages.config -PackagesDirectory source/packages
+          if ($LASTEXITCODE -ne 0) { throw "NuGet restore failed ($LASTEXITCODE)." }
+          Write-Host "Restored packages:"
+          Get-ChildItem source/packages -Directory | Select-Object Name | Format-Table -AutoSize
+
+      - name: Run verification gate
+        shell: pwsh
+        run: |
+          ./build/verify.ps1 -ManifestPath ./updates/UPDATE-MANIFEST.json
+
+      - name: Build user-mode utility (driver-defender.exe)
+        shell: pwsh
+        run: |
+          msbuild source/DriverDefenderUtility.vcxproj `
+            /m `
+            /p:Configuration=${{ matrix.configuration }} `
+            /p:Platform=${{ matrix.platform }} `
+            /p:OutDir=$env:GITHUB_WORKSPACE\build\out\${{ matrix.platform }}\${{ matrix.configuration }}\
+          if ($LASTEXITCODE -ne 0) { throw "Utility build failed ($LASTEXITCODE)." }
+
+      # The driver build is allowed to fail the job loudly, but is isolated so
+      # its status is unambiguous in the log. It requires the WDK's
+      # WindowsKernelModeDriver10.0 platform toolset to be present.
+      - name: Locate WDK tools (stampinf, etc.) from NuGet package
+        id: wdktools
+        shell: pwsh
+        run: |
+          # The WDK NuGet package ships the build tools (stampinf.exe, etc.)
+          # under bin\<version>\<arch>. The StampInf MSBuild task needs them on
+          # PATH. Find the stampinf.exe that matches the build platform.
+          $binRoot = Get-ChildItem -Path source/packages -Recurse -Filter stampinf.exe -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -match '\\${{ matrix.platform }}\\' } |
+            Select-Object -First 1
+          if (-not $binRoot) {
+            $binRoot = Get-ChildItem -Path source/packages -Recurse -Filter stampinf.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+          }
+          if ($binRoot) {
+            $dir = Split-Path -Parent $binRoot.FullName
+            Write-Host "Found WDK tools at: $dir"
+            "bindir=$dir" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          } else {
+            Write-Warning "stampinf.exe not found under source/packages; INF stamping will be disabled."
+            "bindir=" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          }
+
+      - name: Build kernel minifilter driver (WindowsAdminDefender.sys)
+        shell: pwsh
+        run: |
+          $bindir = "${{ steps.wdktools.outputs.bindir }}"
+          if ($bindir) { $env:PATH = "$bindir;$env:PATH" }
+          # If tools were not found, skip INF stamping so the compile/link is
+          # still exercised (this is a build validation, not a signed package).
+          # Disable INF verification for the CI compile/link check: recent WDKs
+          # dropped the 32-bit InfVerif.dll, and this job validates that the
+          # driver compiles and links, not that it produces a shippable signed
+          # package (catalog generation + signing remain separate steps).
+          msbuild source/WindowsAdminDefender.vcxproj `
+            /m `
+            /p:Configuration=${{ matrix.configuration }} `
+            /p:Platform=${{ matrix.platform }} `
+            /p:SignMode=Off `
+            /p:InfVerif_EnableVerification=false `
+            /p:OutDir=$env:GITHUB_WORKSPACE\build\out\${{ matrix.platform }}\${{ matrix.configuration }}\
+          if ($LASTEXITCODE -ne 0) { throw "Driver build failed ($LASTEXITCODE)." }
+
+      - name: List build outputs
+        if: always()
+        shell: pwsh
+        run: |
+          $out = "$env:GITHUB_WORKSPACE\build\out\${{ matrix.platform }}\${{ matrix.configuration }}"
+          if (Test-Path $out) {
+            Get-ChildItem -Recurse $out | Select-Object FullName, Length | Format-Table -AutoSize
+          } else {
+            Write-Host "No output directory produced."
+          }
+
+      - name: Upload build artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-admin-defender-${{ matrix.platform }}-${{ matrix.configuration }}
+          path: build/out/**
+          if-no-files-found: ignore

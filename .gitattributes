@@ -1,0 +1,25 @@
+# Normalize line endings so file bytes are identical on every platform.
+# The SHA-256 verification gate (build/verify.ps1) hashes the checked-out
+# bytes; without pinning EOL, a Windows checkout would convert LF->CRLF and
+# the digests in updates/UPDATE-MANIFEST.json would no longer match.
+
+# Default: let Git normalize text on commit, but do not force a working-tree EOL.
+* text=auto
+
+# Protected build inputs referenced by the verification manifest: pin to LF
+# so their hashed bytes are stable across Linux, macOS, and Windows checkouts.
+*.c    text eol=lf
+*.h    text eol=lf
+*.cpp  text eol=lf
+*.inf  text eol=lf
+
+# Build/support scripts and config kept LF for the same reason.
+*.ps1  text eol=lf
+*.json text eol=lf
+*.yml  text eol=lf
+*.md   text eol=lf
+
+# Binary artifacts (defensive; none tracked today, but future-proofs the repo).
+*.sys  binary
+*.cat  binary
+*.exe  binary

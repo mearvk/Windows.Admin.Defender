@@ -50,6 +50,12 @@ HKR, "Instances", "DefaultInstance", 0x00000000, "Windows Admin Defender Instanc
 HKR, "Instances\\Windows Admin Defender Instance", "Altitude", 0x00000000, "370030"
 HKR, "Instances\\Windows Admin Defender Instance", "Flags", 0x00010001, 0
 
+[SourceDisksNames]
+1 = %DiskName%
+
+[SourceDisksFiles]
+WindowsAdminDefender.sys = 1
+
 [DestinationDirs]
 DriverCopyFiles = 13
 
@@ -57,6 +63,7 @@ DriverCopyFiles = 13
 WindowsAdminDefender.sys
 
 [Strings]
+DiskName = "Windows Admin Defender Installation Media"
 ProviderName = "Windows Admin Defender"
 DeviceName = "Windows Admin Defender File-System Minifilter"
 ServiceName = "Windows Admin Defender File-System Minifilter"
